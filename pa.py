@@ -5,11 +5,12 @@ from prettytable import PrettyTable
 import math
 import json
 
+
 os.system("cls")
 
 table = PrettyTable()
 
-# ###### MENDEFINISIKAN KELAS PYTHON
+# MENDEFINISIKAN KELAS PYTHON
 class Contacts:
     def __init__(self, nama, no_hp):
         self.nama = nama
@@ -31,6 +32,7 @@ class ContactList:
             count += 1
             current = current.next
         return count
+
 
     def merge_sort(self, contacts):
         if len(contacts) > 1:
@@ -80,7 +82,7 @@ class ContactList:
             table.add_row([str(i+1), contact['name'], contact['phone']])
 
         print(table)
-    
+
 # MENAMBAHKAN KONTAK   
     def add_contacts(self):
         print("")
@@ -103,7 +105,7 @@ class ContactList:
         time.sleep(3)
         os.system("cls")
 
-    # MENGUPDATE KONTAK
+# MENGUPDATE KONTAK
     def update_contact(self):
         print("")
         os.system("cls")
@@ -222,52 +224,25 @@ class ContactList:
                 print(action[0], "--->", action[1], "-", action[2])
                 time.sleep(5)
                 os.system("cls")
-import json
-import os
-import time
-import pwinput
 
-# Fungsi untuk melakukan registrasi pengguna free
-def register_free():
+# Fungsi untuk melakukan registrasi
+def register():
     with open("users.json", "r") as f:
         users = json.load(f)
     email = input("Masukkan email: ")
     
-    # Mencari apakah email sudah terdaftar sebelumnya
+# Mencari apakah email sudah terdaftar sebelumnya
     for user in users:
         if email == user["email"]:
             print("Email sudah terdaftar. Silakan login atau gunakan email lain.\n")
             return
     password = pwinput.pwinput("Masukkan password: ")
     phone = input("Masukkan nomor telepon: ")
-    user = {"email": email, "password": password, "phone": phone, "is_premium": False}
+    user = {"email": email, "password": password, "phone": phone}
     users.append(user)
     with open("users.json", "w") as f:
         json.dump(users, f)
     print("Registrasi berhasil.\n")
-    print("Loading...")
-    time.sleep(2)
-    os.system("cls")
-
-# Fungsi untuk melakukan registrasi pengguna premium
-def register_premium():
-    with open("users.json", "r") as f:
-        users = json.load(f)
-    email = input("Masukkan email: ")
-    
-    # Mencari apakah email sudah terdaftar sebelumnya
-    for user in users:
-        if email == user["email"]:
-            print("Email sudah terdaftar. Silakan login atau gunakan email lain.\n")
-            return
-    password = pwinput.pwinput("Masukkan password: ")
-    phone = input("Masukkan nomor telepon: ")
-    user = {"email": email, "password": password, "phone": phone, "is_premium": True}
-    users.append(user)
-    with open("users.json", "w") as f:
-        json.dump(users, f)
-    print("Registrasi berhasil.\n")
-    print("Loading...")
     time.sleep(2)
     os.system("cls")
 
@@ -281,11 +256,10 @@ def login():
         for user in users:
             if email == user["email"] and password == user["password"]:
                 print("Login berhasil.\n")
-                print("Loading...")
                 time.sleep(2)
                 os.system("cls")
+                return
         print("Email atau password salah.\n")
-
 
 # Program utama
 def utama():
@@ -304,21 +278,20 @@ def utama():
             login()
             main()
         elif choice == 2:
-            a = input("pilih y untuk register free dan pilih t untuk register premium: ")
-            if a == "y":
-                register_free()
-            elif a == "t":
-                register_premium()
+            register()
         else:
             print("Menu tidak tersedia.\n")
 
 
-# ###### MENU PROGRAM                
-def main_free():
+# MENU PROGRAM                
+def main():
     if __name__ == '__main__':
         print("")
         contacts_list = ContactList()
         while True:
+            print("============================================================".center(70))
+            print("======== SILAHKAN PILIH MENU YANG INGIN ANDA AKSES =========".center(70))
+            print("============================================================".center(70))
             print("""
             +====================================================+
             |           ==== MENU YANG TERSEDIA ====             |
@@ -326,6 +299,9 @@ def main_free():
             |                (1) TAMBAH KONTAK                   |
             |                (2) HAPUS KONTAK                    |
             |                (3) LIHAT KONTAK                    |
+            |                (4) CARI KONTAK                     |
+            |                (5) LIHAT HISTORY                   |
+            |                (6) UPDATE KONTAK                   |
             +====================================================+
             """)
             print("")
@@ -340,6 +316,12 @@ def main_free():
                 print("=======  DAFTAR KONTAK ANDA  =======")
                 contacts_list.sort_contacts()
                 print("====================================")
+            elif choice == '4':
+                contacts_list.search_contact()
+            elif choice == '5':
+                contacts_list.display_history()
+            elif choice == '6':
+                contacts_list.update_contact()
             else:
                 print("=== MAAF TIDAK ADA PILIHAN, SILAHKAN PILIH ULANG (1-6) ===")
 
