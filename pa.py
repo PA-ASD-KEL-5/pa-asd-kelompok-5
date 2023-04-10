@@ -33,7 +33,7 @@ class ContactList:
             current = current.next
         return count
 
-
+# DEFINISI MERGESORT
     def merge_sort(self, contacts):
         if len(contacts) > 1:
             mid = len(contacts) // 2
@@ -68,6 +68,7 @@ class ContactList:
 
         return contacts
 
+# MENGURUTKAN KONTAK MENGGUNAKAN MERGESORT
     def sort_contacts(self):
         contacts = []
         current = self.head
@@ -80,8 +81,11 @@ class ContactList:
         table = PrettyTable(['No', 'Nama', 'No. HP'])
         for i, contact in enumerate(sorted_contacts):
             table.add_row([str(i+1), contact['name'], contact['phone']])
-
+        print("Mohon Tunggu...")
+        time.sleep(2)
+        os.system("cls")
         print(table)
+        back()
 
 # MENAMBAHKAN KONTAK   
     def add_contacts(self):
@@ -102,7 +106,7 @@ class ContactList:
         print("")
         print("=== KONTAK BERHASIL DITAMBAHKAN ===")
         print("Mohon Tunggu...")
-        time.sleep(3)
+        time.sleep(2)
         os.system("cls")
 
 # MENGUPDATE KONTAK
@@ -126,14 +130,14 @@ class ContactList:
                 print("")
                 print("=== KONTAK BERHASIL DIUPDATE ===")
                 print("Mohon Tunggu...")
-                time.sleep(3)
+                time.sleep(2)
                 os.system("cls")
                 return
             current = current.next
         print("")
         print("=== MAAF, KONTAK TIDAK DITEMUKAN ===")
-        time.sleep(3)
-        os.system("cls")
+        back()
+
 # MENGHAPUS KONTAK
     def delete_contacts(self):
         print("")
@@ -158,7 +162,7 @@ class ContactList:
                 print("")
                 print("=== KONTAK BERHASIL DIHAPUS ===")
                 print("Mohon Tunggu...")
-                time.sleep(3)
+                time.sleep(2)
                 os.system("cls")
                 return
             current = current.next
@@ -166,13 +170,8 @@ class ContactList:
         print("=== MAAF, KONTAK TIDAK DITEMUKAN ===")
         time.sleep(3)
         os.system("cls")
-    
-# MENAMPILKAN KONTAK
-    def display_contacts(contacts):
-        for i, contact in enumerate(contacts):
-            print(f"{i+1}. {contact['name']}: {contact['phone']}")
-            print()
 
+# MENDIFINISIKAN JUMP SEARCH
     def jump_search(self, nama, jump):
         current = self.head
         count = 0
@@ -185,7 +184,8 @@ class ContactList:
                     break
             current = current.next
         return None
-    
+
+# MENCARI KONTAK MENGGUNAKAN JUMP SEARCH 
     def search_contact(self):
         print("")
         os.system("cls")
@@ -208,8 +208,8 @@ class ContactList:
             for contact in result_list:
                 table.add_row([contact.nama, contact.no_hp])
             print(table)
-            time.sleep(5)
-            os.system("cls")
+            back()
+
 
 # MENAMPILKAN RIWAYAT        
     def display_history(self):
@@ -222,8 +222,7 @@ class ContactList:
         else:
             for action in self.history:
                 print(action[0], "--->", action[1], "-", action[2])
-                time.sleep(5)
-                os.system("cls")
+                back()
 
 # Fungsi untuk melakukan registrasi
 def register():
@@ -271,6 +270,7 @@ def utama():
         ||===================================||
         ||      1. Login                     ||
         ||      2. Register                  ||
+        ||      3. Exit                      ||
         ||===================================||\n''')
 
         choice = int(input("Pilih menu: "))
@@ -279,6 +279,8 @@ def utama():
             main()
         elif choice == 2:
             register()
+        elif choice == 3:
+            exit()
         else:
             print("Menu tidak tersedia.\n")
 
@@ -302,6 +304,7 @@ def main():
             |                (4) CARI KONTAK                     |
             |                (5) LIHAT HISTORY                   |
             |                (6) UPDATE KONTAK                   |
+            |                (7) KELUAR                          |
             +====================================================+
             """)
             print("")
@@ -322,7 +325,29 @@ def main():
                 contacts_list.display_history()
             elif choice == '6':
                 contacts_list.update_contact()
+            elif choice == '7':
+                exit()
             else:
                 print("=== MAAF TIDAK ADA PILIHAN, SILAHKAN PILIH ULANG (1-6) ===")
+
+def exit():
+    time.sleep(2)
+    os.system("cls")
+    print ("=== TERIMA KASIH ===")
+    raise SystemExit
+    
+def back():
+    print ('''
+0. back
+1. Exit''')
+
+    pilih = input("SILAHKAN PILIH OPSI : ")
+    if pilih == '1':
+        print("Tunggu...")
+        time.sleep(2)
+        os.system("cls")
+        main()
+    elif pilih == '2':
+        exit()
 
 utama()
