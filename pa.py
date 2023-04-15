@@ -35,7 +35,7 @@ class ContactList:
 
 # DEFINISI MERGESORT
 
-     def merge_sort(self, contacts, sort_by):
+    def merge_sort(self, contacts, sort_by):
         if len(contacts) > 1:
             mid = len(contacts) // 2
             left_half = contacts[:mid]
@@ -79,7 +79,7 @@ class ContactList:
     
 # MENGURUTKAN KONTAK MENGGUNAKAN MERGESORT
 
-     def sort_contacts(self):
+    def sort_contacts(self):
         print("PILIH KATEGORI URUTAN UNTUK MELIHAT KONTAK : ")
         print("1. Nama")
         print("2. Nomor Telepon")
@@ -110,7 +110,7 @@ class ContactList:
 
 # MENAMBAHKAN KONTAK 
 
-     def add_contacts(self):
+    def add_contacts(self):
         print("")
         os.system("cls")
         while True:
@@ -243,7 +243,7 @@ class ContactList:
         return None
 
 # MENCARI KONTAK MENGGUNAKAN JUMP SEARCH 
-   def search_contact(self):
+    def search_contact(self):
         print("")
         os.system("cls")
         while True:
@@ -348,7 +348,7 @@ def utama():
                 exit()
             else:
                 print("Menu tidak tersedia.\n")
-     except:
+    except:
         print("masukkan menu yang benar: ")
         utama()
 
