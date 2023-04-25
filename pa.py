@@ -3,13 +3,82 @@ import time
 import pwinput
 from prettytable import PrettyTable
 import math
-import json
-
+import mysql.connector
 
 os.system("cls")
 
-table = PrettyTable()
+def database() :
+    db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="",
+    database="kontak"
+    )
+    return db
 
+#fungsi registrasi user
+import re
+
+def register():
+    db = database()
+    #membuat objek cursor untuk melakukan operasi database
+    cursor = db.cursor()
+    #mengambil input user
+    username = str(input("Masukkan email : "))
+    password = str(input("Masukkan password : "))
+    no_hp = str(input("Masukan nomor telepon : "))
+
+    if username == ""  or password == "" or no_hp =="":
+        print("Input tidak boleh kosong")
+        time.sleep(3)
+    elif not re.match("^[0-9]*$", no_hp):
+        # jika nomor telepon mengandung karakter selain angka
+        print("Nomor telepon harus terdiri dari angka saja.")
+        register()
+        time.sleep(2)
+    else :
+        #mengecek apakah username sudah terdaftar di dalam tabel user di database
+        cursor.execute("SELECT * FROM user WHERE email=%s", (username,))
+        result = cursor.fetchone()
+
+        if result: #jika username telah terdaftar
+            print("email sudah terdaftar.")
+            time.sleep(3)
+
+        else: #jika username belum terdaftar
+
+            # menambahkan user baru ke database
+            sql = "INSERT INTO user (email, password, no_telepon) VALUES (%s, %s, %s)"
+            val = (username, password, no_hp)
+            cursor.execute(sql, val) # eksekusi query
+            db.commit() #menyimpan perubahan pada database setelah query dijalankan
+
+            print("Registrasi berhasil.")
+
+#fungsi login user
+def login():
+    global username
+
+    username = input("Masukkan email : ")
+    password = pwinput.pwinput(prompt="Masukkan password : ")
+
+    db = database()
+    cursor = db.cursor()
+    sql = "SELECT * FROM user WHERE email = %s AND password = %s"
+    val = (username, password)
+    cursor.execute(sql, val)
+    
+    user = cursor.fetchone() #mengambil satu baris data dari hasil query yang telah dieksekusi 
+  
+    if user: #jika user ditemukan
+        print("Login berhasil!")
+        
+    else: #jika user tidak ditemukan
+        print("Username atau password salah.")
+        login()
+        time.sleep(2)
+
+table = PrettyTable()
 # MENDEFINISIKAN KELAS PYTHON
 class Contacts:
     def __init__(self, nama, no_hp):
@@ -32,6 +101,64 @@ class ContactList:
             count += 1
             current = current.next
         return count
+
+    def add_database(self):
+        #menambahkan data ke dalam database
+        print("")
+        os.system("cls")
+        while True:
+            nama = input("MASUKKAN NAMA KONTAK: ")
+            if not nama:
+                print("ERROR: Nama kontak tidak boleh kosong. Silakan coba lagi.")
+                continue
+            no_hp = input("MASUKKAN NOMOR TELEPON: ")
+            if not no_hp:
+                print("ERROR: Nomor telepon tidak boleh kosong. Silakan coba lagi.")
+                continue
+            elif not no_hp.isdigit():
+                print("ERROR: Nomor telepon hanya boleh diisi dengan angka. Silakan coba lagi.")
+                continue
+            elif self.find_contact_by_no_hp(no_hp):
+                print("ERROR: Nomor telepon sudah terdaftar. Silakan coba lagi.")
+                continue
+
+            db = database()
+            cursor = db.cursor()
+            sql = "INSERT INTO nomor_telepon (nama, nomor, email) VALUES (%s, %s, %s)"
+            val = (nama, no_hp, username)
+            cursor.execute(sql, val)
+            db.commit()
+
+            self.history.append(("Kontak Ditambahkan", nama, no_hp))
+            print("")
+            print("=== KONTAK BERHASIL DITAMBAHKAN ===")
+            print("Mohon Tunggu...")
+            time.sleep(1)
+            os.system("cls")
+            break
+
+    def get_data(self):
+        #mengambil data dari database
+        db = database()
+        cursor = db.cursor()
+        sql = "SELECT * FROM nomor_telepon WHERE email = %s"
+        val = (username,)
+        cursor.execute(sql, val)
+        data = cursor.fetchall()
+        return data
+
+    def refreshList(self):
+        #mereset semua data di node
+        self.reset_data()
+        #untuk mengambil data dari database
+        result = self.get_data()
+        for i in result:
+            # Memasukan data kedalam node
+            self.add_contacts(i[0], i[1])
+
+    def reset_data(self):
+        # Mengembalikan self.head menjadi None
+        self.head = None
 
 # DEFINISI MERGESORT
 
@@ -110,39 +237,15 @@ class ContactList:
 
 # MENAMBAHKAN KONTAK 
 
-    def add_contacts(self):
-        print("")
-        os.system("cls")
-        while True:
-            nama = input("MASUKKAN NAMA KONTAK: ")
-            if not nama:
-                print("ERROR: Nama kontak tidak boleh kosong. Silakan coba lagi.")
-                continue
-            no_hp = input("MASUKKAN NOMOR TELEPON: ")
-            if not no_hp:
-                print("ERROR: Nomor telepon tidak boleh kosong. Silakan coba lagi.")
-                continue
-            elif not no_hp.isdigit():
-                print("ERROR: Nomor telepon hanya boleh diisi dengan angka. Silakan coba lagi.")
-                continue
-            elif self.find_contact_by_no_hp(no_hp):
-                print("ERROR: Nomor telepon sudah terdaftar. Silakan coba lagi.")
-                continue
-            no_baru = Contacts(nama, no_hp)
-            if self.head is None:
-                self.head = no_baru
-                self.tail = no_baru
-            else:
-                no_baru.previous = self.tail
-                self.tail.next = no_baru
-                self.tail = no_baru
-            self.history.append(("Kontak Ditambahkan", nama, no_hp))
-            print("")
-            print("=== KONTAK BERHASIL DITAMBAHKAN ===")
-            print("Mohon Tunggu...")
-            time.sleep(1)
-            os.system("cls")
-            break
+    def add_contacts(self, nama, no_hp):
+        no_baru = Contacts(nama, no_hp)
+        if self.head is None:
+            self.head = no_baru
+            self.tail = no_baru
+        else:
+            no_baru.previous = self.tail
+            self.tail.next = no_baru
+            self.tail = no_baru
 
     def find_contact_by_no_hp(self, no_hp):
         current = self.head
@@ -154,79 +257,30 @@ class ContactList:
 
 
 # MENGUPDATE KONTAK
-
     def update_contact(self):
-        print("")
-        os.system("cls")
         nama = input("MASUKKAN NAMA KONTAK YANG INGIN DIUPDATE: ")
-        current = self.head
-        while current:
-            if current.nama.lower() == nama.lower():
-                print("KONTAK YANG AKAN DIUPDATE: ")
-                print(f"NAMA: {current.nama}")
-                print(f"NO HP: {current.no_hp}")
-                new_nama = input("MASUKKAN NAMA BARU (ATAU TEKAN ENTER JIKA TIDAK INGIN DIUBAH): ")
-                new_no_hp = input("MASUKKAN NOMOR TELEPON BARU (ATAU TEKAN ENTER JIKA TIDAK INGIN DIUBAH): ")
-                if new_nama == "" and new_no_hp == "":
-                    print("=== TIDAK ADA DATA YANG DIUBAH ===")
-                    time.sleep(3)
-                    os.system("cls")
-                    return
-                if new_nama.strip() != "":
-                    current.nama = new_nama.strip()
-                if new_no_hp.isdigit():
-                    current.no_hp = new_no_hp
-                else:
-                    print("=== NOMOR TELEPON TIDAK VALID ===")
-                    time.sleep(1)
-                    os.system("cls")
-                    return
-                self.history.append(("Kontak Diupdate", current.nama, current.no_hp))
-                print("")
-                print("=== KONTAK BERHASIL DIUPDATE ===")
-                print("Mohon Tunggu...")
-                time.sleep(3)
-                os.system("cls")
-                return
-            current = current.next
-        print("")
-        print("=== MAAF, KONTAK TIDAK DITEMUKAN ===")
-        time.sleep(1)
-        os.system("cls")
-        back()
-
+        new_no_hp = input("MASUKKAN NOMOR TELEPON BARU: ")
+        db = database()
+        cursor = db.cursor()
+        sql = "UPDATE nomor_telepon SET nomor = %s WHERE nama = %s"
+        val = (new_no_hp,nama)
+        cursor.execute(sql, val)
+        db.commit()
+        print("Kontak berhasil diupdate.")
+        self.refreshList()
+   
 # MENGHAPUS KONTAK
     def delete_contacts(self):
-        print("")
-        os.system("cls")
         nama = input("\nMASUKKAN NAMA KONTAK YANG INGIN DIHAPUS: ")
-        current = self.head
-        while current:
-            if current.nama.lower() == nama.lower():
-                if current == self.head and current == self.tail:
-                    self.head = None
-                    self.tail = None
-                elif current == self.head:
-                    self.head = current.next
-                    current.next.previous = None
-                elif current == self.tail:
-                    self.tail = current.previous
-                    current.previous.next = None
-                else:
-                    current.previous.next = current.next
-                    current.next.previous = current.previous
-                self.history.append(("Kontak Dihapus", current.nama, current.no_hp))
-                print("")
-                print("=== KONTAK BERHASIL DIHAPUS ===")
-                print("Mohon Tunggu...")
-                time.sleep(2)
-                os.system("cls")
-                return
-            current = current.next
-        print("")
-        print("=== MAAF, KONTAK TIDAK DITEMUKAN ===")
-        time.sleep(3)
-        os.system("cls")
+        #menghapus data di database
+        db = database()
+        cursor = db.cursor()
+        sql = "DELETE FROM nomor_telepon WHERE nama = %s"
+        val = (nama,)
+        cursor.execute(sql, val)
+        db.commit()
+        print("Kontak berhasil dihapus.")
+        self.refreshList()       
 
 # MENDIFINISIKAN JUMP SEARCH
     def jump_search(self, nama, jump):
@@ -288,42 +342,6 @@ class ContactList:
                 print(action[0], "--->", action[1], "-", action[2])
                 back()
 
-# Fungsi untuk melakukan registrasi
-def register():
-    with open("users.json", "r") as f:
-        users = json.load(f)
-    email = input("Masukkan email: ")
-    
-# Mencari apakah email sudah terdaftar sebelumnya
-    for user in users:
-        if email == user["email"]:
-            print("Email sudah terdaftar. Silakan login atau gunakan email lain.\n")
-            return
-    password = pwinput.pwinput("Masukkan password: ")
-    phone = input("Masukkan nomor telepon: ")
-    user = {"email": email, "password": password, "phone": phone}
-    users.append(user)
-    with open("users.json", "w") as f:
-        json.dump(users, f)
-    print("Registrasi berhasil.\n")
-    time.sleep(2)
-    os.system("cls")
-
-# Fungsi untuk melakukan login
-def login():
-    while True:
-        with open("users.json", "r") as f:
-            users = json.load(f)
-        email = input("Masukkan email: ")
-        password = pwinput.pwinput("Masukkan password: ")
-        for user in users:
-            if email == user["email"] and password == user["password"]:
-                print("Login berhasil.\n")
-                time.sleep(2)
-                os.system("cls")
-                return
-        print("Email atau password salah.\n")
-
 # Program utama
 def utama():
     try:
@@ -380,10 +398,11 @@ def main():
                 choice = input("SILAHKAN PILIH MENU YANG ANDA INGINKAN (1-6): ")
 
                 if choice == '1':
-                    contacts_list.add_contacts()
+                    contacts_list.add_database()
                 elif choice == '2':
                     contacts_list.delete_contacts()
                 elif choice == '3':
+                    contacts_list.refreshList()
                     print("=======  DAFTAR KONTAK ANDA  =======")
                     contacts_list.sort_contacts()
                     print("====================================")
