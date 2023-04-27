@@ -101,11 +101,9 @@ class ContactList:
             count += 1
             current = current.next
         return count
-
+    
     def add_database(self):
-        #menambahkan data ke dalam database
-        print("")
-        os.system("cls")
+    #menambahkan data ke dalam database
         while True:
             nama = input("MASUKKAN NAMA KONTAK: ")
             if not nama:
@@ -118,12 +116,29 @@ class ContactList:
             elif not no_hp.isdigit():
                 print("ERROR: Nomor telepon hanya boleh diisi dengan angka. Silakan coba lagi.")
                 continue
-            elif self.find_contact_by_no_hp(no_hp):
-                print("ERROR: Nomor telepon sudah terdaftar. Silakan coba lagi.")
-                continue
 
             db = database()
             cursor = db.cursor()
+
+            # Cek apakah nama kontak sudah ada di database
+            sql = "SELECT * FROM nomor_telepon WHERE nama = %s"
+            val = (nama,)
+            cursor.execute(sql, val)
+            result = cursor.fetchone()
+            if result:
+                print("ERROR: Nama kontak sudah terdaftar. Silakan coba lagi.")
+                continue
+
+            # Cek apakah nomor telepon sudah ada di database
+            sql = "SELECT * FROM nomor_telepon WHERE nomor = %s"
+            val = (no_hp,)
+            cursor.execute(sql, val)
+            result = cursor.fetchone()
+            if result:
+                print("ERROR: Nomor telepon sudah terdaftar. Silakan coba lagi.")
+                continue
+
+            # Jika nama dan nomor telepon belum terdaftar, tambahkan ke database
             sql = "INSERT INTO nomor_telepon (nama, nomor, email) VALUES (%s, %s, %s)"
             val = (nama, no_hp, username)
             cursor.execute(sql, val)
@@ -136,6 +151,7 @@ class ContactList:
             time.sleep(1)
             os.system("cls")
             break
+
 
     def get_data(self):
         #mengambil data dari database
