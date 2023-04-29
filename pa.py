@@ -2,7 +2,7 @@ import os
 import time
 import pwinput
 from prettytable import PrettyTable
-import math
+from datetime import datetime
 import mysql.connector
 
 os.system("cls")
@@ -104,7 +104,7 @@ class ContactList:
         return count
     
     def add_database(self):
-    #menambahkan data ke dalam database
+    # menambahkan data ke dalam database
         while True:
             nama = input("MASUKKAN NAMA KONTAK: ")
             if not nama:
@@ -142,7 +142,9 @@ class ContactList:
             cursor.execute(sql, val)
             db.commit()
 
-            self.history.append(("Kontak Ditambahkan", nama, no_hp))
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self.history.append(("Kontak Ditambahkan", current_time, nama, no_hp))
+
             print("")
             print("=== KONTAK BERHASIL DITAMBAHKAN ===")
             print("Mohon Tunggu...")
@@ -150,12 +152,11 @@ class ContactList:
             os.system("cls")
             break
 
-
     def get_data(self):
         #mengambil data dari database
         db = database()
         cursor = db.cursor()
-        sql = "SELECT * FROM nomor_telepon WHERE email = %s"
+        sql = "SELECT * FROM nomor_telepon WHERE email = %s ORDER BY nama ASC"
         val = (username,)
         cursor.execute(sql, val)
         data = cursor.fetchall()
@@ -247,6 +248,7 @@ class ContactList:
             table.add_row([str(i+1), contact['name'], contact['phone']])
 
         print(table)
+        back()
 
 # MENAMBAHKAN KONTAK 
 
@@ -281,8 +283,13 @@ class ContactList:
         db.commit()
         print("Kontak berhasil diupdate.")
         self.refreshList()
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        action = f"Update kontak: {nama}, nomor telepon baru: {new_no_hp}"
+        self.history.append((now, "update_contact", action))
+        self.refreshList()
    
 # MENGHAPUS KONTAK
+    
     def delete_contacts(self):
         nama = input("\nMASUKKAN NAMA KONTAK YANG INGIN DIHAPUS: ")
         #menghapus data di database
@@ -293,6 +300,10 @@ class ContactList:
         cursor.execute(sql, val)
         db.commit()
         print("Kontak berhasil dihapus.")
+        self.refreshList()
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        action = f"Hapus kontak: {nama}"
+        self.history.append((now, "delete_contacts", action))
         self.refreshList()       
 
 # MENDIFINISIKAN JUMP SEARCH
@@ -300,23 +311,24 @@ class ContactList:
         current = self.head
         count = 0
         while current:
-            if current.nama.lower().find(nama.lower()):
+            if nama.lower() in current.nama.lower():
                 return current
             count += 1
             if count % jump == 0:
-                if current.nama.lower() >= nama.lower():
+                if not current.next or current.next.nama.lower() >= nama.lower():
                     break
             current = current.next
         return None
 
 # MENCARI KONTAK MENGGUNAKAN JUMP SEARCH 
+ 
     def search_contact(self):
         print("")
+        self.refreshList()
         os.system("cls")
         while True:
             nama = input("MASUKKAN NAMA KONTAK YANG INGIN DICARI: ")
-        
-            jump = int(math.sqrt(len(self)))
+            jump = 10  # Ganti dengan angka tetap yang lebih optimal
             result = self.jump_search(nama, jump)
             if not result:
                 print("")
@@ -324,7 +336,7 @@ class ContactList:
             else:
                 result_list = []
                 while result:
-                    if result and result.nama.lower().find(nama.lower()) != -1:
+                    if nama.lower() in result.nama.lower():
                         result_list.append(result)
                     result = result.next
                 os.system("cls")
@@ -336,7 +348,8 @@ class ContactList:
                 print(table)
                 time.sleep(3)
                 os.system("cls")
-                main()
+                back()
+
 
 # MENAMPILKAN RIWAYAT        
     def display_history(self):
@@ -348,8 +361,9 @@ class ContactList:
             print("MAAF, TIDAK ADA RIWAYAT ANDA".center(70))
         else:
             for action in self.history:
-                time.sleep(3)
+                time.sleep(2)
                 print(action[0], "--->", action[1], "-", action[2])
+                back()
 
 # Program utama
 def utama():
@@ -434,5 +448,27 @@ def exit():
     time.sleep(2)
     os.system("cls")
     print ("=== TERIMA KASIH ===")
+    
+def back():
+    try:
+        while True:
+            print ('''
+        1. back
+        2. Exit''')
+
+            pilih = input("SILAHKAN PILIH OPSI : ")
+            if pilih == '1':
+                print("Tunggu...")
+                time.sleep(2)
+                os.system("cls")
+                main()
+            elif pilih == '2':
+                login()
+            else:
+                print("pilihan tidak valid")
+
+    except:
+        print("opsi tidak valid silahkan coba lagi ")
+        back()
 
 utama()
