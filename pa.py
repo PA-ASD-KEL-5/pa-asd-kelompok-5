@@ -12,7 +12,7 @@ def database() :
     host="localhost",
     user="root",
     password="",
-    database="kontak"
+    database="contact"
     )
     return db
 
@@ -54,6 +54,7 @@ def register():
             db.commit() #menyimpan perubahan pada database setelah query dijalankan
 
             print("Registrasi berhasil.")
+            utama()
 
 #fungsi login user
 def login():
@@ -246,7 +247,6 @@ class ContactList:
             table.add_row([str(i+1), contact['name'], contact['phone']])
 
         print(table)
-        back()
 
 # MENAMBAHKAN KONTAK 
 
@@ -336,7 +336,7 @@ class ContactList:
                 print(table)
                 time.sleep(3)
                 os.system("cls")
-                back()
+                main()
 
 # MENAMPILKAN RIWAYAT        
     def display_history(self):
@@ -348,8 +348,8 @@ class ContactList:
             print("MAAF, TIDAK ADA RIWAYAT ANDA".center(70))
         else:
             for action in self.history:
+                time.sleep(3)
                 print(action[0], "--->", action[1], "-", action[2])
-                back()
 
 # Program utama
 def utama():
@@ -375,6 +375,7 @@ def utama():
                 exit()
             else:
                 print("Menu tidak tersedia.\n")
+            break
     except:
         print("masukkan pilihan dengan benar ")
         utama()
@@ -422,7 +423,7 @@ def main():
                 elif choice == '6':
                     contacts_list.update_contact()
                 elif choice == '7':
-                    exit()
+                    utama()
                 else:
                     print("=== MAAF TIDAK ADA PILIHAN, SILAHKAN PILIH ULANG (1-6) ===")
         except:
@@ -433,20 +434,5 @@ def exit():
     time.sleep(2)
     os.system("cls")
     print ("=== TERIMA KASIH ===")
-    raise SystemExit
-    
-def back():
-    print ('''
-0. back
-1. Exit''')
-
-    pilih = input("SILAHKAN PILIH OPSI : ")
-    if pilih == '1':
-        print("Tunggu...")
-        time.sleep(2)
-        os.system("cls")
-        main()
-    elif pilih == '2':
-        exit()
 
 utama()
