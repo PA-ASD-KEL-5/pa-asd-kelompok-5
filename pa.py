@@ -419,7 +419,7 @@ def main():
                 """)
                 print("")
 
-                choice = input("SILAHKAN PILIH MENU YANG ANDA INGINKAN (1-6): ")
+                choice = input("SILAHKAN PILIH MENU YANG ANDA INGINKAN (1-7): ")
 
                 if choice == '1':
                     contacts_list.add_database()
