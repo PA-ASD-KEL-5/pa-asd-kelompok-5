@@ -125,9 +125,6 @@ class ContactList:
             val = (nama,)
             cursor.execute(sql, val)
             result = cursor.fetchone()
-            if result:
-                print("ERROR: Nama kontak sudah terdaftar. Silakan coba lagi.")
-                continue
 
             # Cek apakah nomor telepon sudah ada di database
             sql = "SELECT * FROM nomor_telepon WHERE nomor = %s"
@@ -303,7 +300,7 @@ class ContactList:
         current = self.head
         count = 0
         while current:
-            if current.nama.lower().find(nama.lower()) != -1:
+            if current.nama.lower().find(nama.lower()):
                 return current
             count += 1
             if count % jump == 0:
@@ -318,32 +315,28 @@ class ContactList:
         os.system("cls")
         while True:
             nama = input("MASUKKAN NAMA KONTAK YANG INGIN DICARI: ")
-            if not nama:
-                print("ERROR: Nama kontak tidak boleh kosong. Silakan coba lagi.")
-                continue
+        
+            jump = int(math.sqrt(len(self)))
+            result = self.jump_search(nama, jump)
+            if not result:
+                print("")
+                print("MAAF, TIDAK DITEMUKAN KONTAK DENGAN NAMA TERSEBUT")
             else:
-                break
-        jump = int(math.sqrt(len(self)))
-        result = self.jump_search(nama, jump)
-        if not result:
-            print("")
-            print("MAAF, TIDAK DITEMUKAN KONTAK DENGAN NAMA TERSEBUT")
-        else:
-            result_list = []
-            while result:
-                if result.nama.lower().find(nama.lower()) != -1:
-                    result_list.append(result)
-                result = result.next
-            os.system("cls")
-            print(">>>> HASIL PENCARIAN KONTAK <<<<")
-            print("")
-            table = PrettyTable(['Nama', 'No. HP'])
-            for contact in result_list:
-                table.add_row([contact.nama, contact.no_hp])
-            print(table)
-            time.sleep(3)
-            os.system("cls")
-            back()
+                result_list = []
+                while result:
+                    if result and result.nama.lower().find(nama.lower()) != -1:
+                        result_list.append(result)
+                    result = result.next
+                os.system("cls")
+                print(">>>> HASIL PENCARIAN KONTAK <<<<")
+                print("")
+                table = PrettyTable(['Nama', 'No. HP'])
+                for contact in result_list:
+                    table.add_row([contact.nama, contact.no_hp])
+                print(table)
+                time.sleep(3)
+                os.system("cls")
+                back()
 
 # MENAMPILKAN RIWAYAT        
     def display_history(self):
@@ -383,7 +376,7 @@ def utama():
             else:
                 print("Menu tidak tersedia.\n")
     except:
-        print("masukkan menu yang benar: ")
+        print("masukkan pilihan dengan benar ")
         utama()
 
 # MENU PROGRAM                
